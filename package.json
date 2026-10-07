@@ -1,0 +1,17 @@
+{
+  "name": "laemchabang-crm-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --host 0.0.0.0",
+    "build": "nuxt build",
+    "preview": "nuxt preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "mysql2": "^3.24.5",
+    "nuxt": "^3.17.5",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  }
+}

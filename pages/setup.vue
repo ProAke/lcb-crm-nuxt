@@ -1,0 +1,54 @@
+<script setup lang="ts">
+const { notify } = useAppToast()
+const activeTab = ref('ยี่ห้อสินค้า')
+const showModal = ref(false)
+const itemName = ref('')
+const itemNote = ref('')
+const brands = ref([
+  { name: 'MICHELIN', type: 'ยางรถยนต์', products: 28, state: 'ใช้งาน', code: 'MI' },
+  { name: 'BRIDGESTONE', type: 'ยางรถยนต์', products: 24, state: 'ใช้งาน', code: 'BS' },
+  { name: 'GOODYEAR', type: 'ยางรถยนต์', products: 18, state: 'ใช้งาน', code: 'GY' },
+  { name: 'DUNLOP', type: 'ยางรถยนต์', products: 14, state: 'ใช้งาน', code: 'DU' },
+  { name: 'YOKOHAMA', type: 'ยางรถยนต์', products: 12, state: 'ใช้งาน', code: 'YK' },
+  { name: 'COCKPIT SERVICE', type: 'บริการ', products: 8, state: 'ใช้งาน', code: 'CS' }
+])
+const categories = ref([
+  { name: 'ยางรถยนต์', parent: 'สินค้า', products: 74, state: 'ใช้งาน', color: 'red' },
+  { name: 'น้ำมันเครื่อง', parent: 'สินค้า', products: 19, state: 'ใช้งาน', color: 'amber' },
+  { name: 'อะไหล่และอุปกรณ์', parent: 'สินค้า', products: 31, state: 'ใช้งาน', color: 'blue' },
+  { name: 'บริการบำรุงรักษา', parent: 'บริการ', products: 24, state: 'ใช้งาน', color: 'green' }
+])
+const manuals = ref([
+  { title: 'เริ่มต้นใช้งาน CRM', desc: 'ภาพรวมระบบ, เมนูหลัก และวิธีจัดการผู้ใช้งาน', category: 'ผู้ดูแลระบบ', updated: '1 ต.ค. 2569', read: '8 นาที' },
+  { title: 'จัดการสมาชิกและคะแนนสะสม', desc: 'ตรวจสอบข้อมูลสมาชิก, แก้ไขโปรไฟล์ และรายการคะแนน', category: 'สมาชิก', updated: '28 ก.ย. 2569', read: '6 นาที' },
+  { title: 'จัดการคิวบริการ', desc: 'สร้างการจอง, ยืนยันคิว และอัปเดตสถานะการให้บริการ', category: 'จองคิว', updated: '22 ก.ย. 2569', read: '5 นาที' },
+  { title: 'Rich Menu และ LINE Broadcast', desc: 'ตั้งค่าพื้นที่แตะ, ลิงก์ปลายทาง และตรวจสอบก่อนเผยแพร่', category: 'LINE OA', updated: '18 ก.ย. 2569', read: '10 นาที' }
+])
+const actionLabel = computed(() => activeTab.value === 'คู่มือการใช้งาน' ? 'เพิ่มคู่มือ' : activeTab.value === 'ยี่ห้อสินค้า' ? 'เพิ่มยี่ห้อ' : 'เพิ่มหมวดหมู่')
+function addItem() {
+  if (!itemName.value.trim()) return notify('กรุณาระบุชื่อรายการ')
+  if (activeTab.value === 'ยี่ห้อสินค้า') brands.value.unshift({ name: itemName.value.toUpperCase(), type: itemNote.value || 'ยางรถยนต์', products: 0, state: 'ใช้งาน', code: itemName.value.slice(0, 2).toUpperCase() })
+  if (activeTab.value === 'หมวดหมู่') categories.value.unshift({ name: itemName.value, parent: itemNote.value || 'สินค้า', products: 0, state: 'ใช้งาน', color: 'red' })
+  if (activeTab.value === 'คู่มือการใช้งาน') manuals.value.unshift({ title: itemName.value, desc: itemNote.value || 'คู่มือการใช้งานใหม่', category: 'ทั่วไป', updated: 'วันนี้', read: '5 นาที' })
+  showModal.value = false; itemName.value = ''; itemNote.value = ''; notify(`เพิ่ม${actionLabel.value.replace('เพิ่ม','')}ตัวอย่างแล้ว`)
+}
+</script>
+
+<template>
+  <div class="page-heading"><div><div class="eyebrow">MASTER DATA & HELP CENTER</div><h1>ข้อมูลตั้งต้น</h1><p>จัดการยี่ห้อสินค้า หมวดหมู่ และคู่มือการใช้งานระบบ</p></div><div class="heading-actions"><button class="btn btn-light" @click="notify('ข้อมูลตั้งต้นจะส่งออกได้เมื่อเชื่อมฐานข้อมูล')"><AppIcon name="download" :size="15" />ส่งออก</button><button class="btn btn-primary" @click="showModal = true"><AppIcon name="plus" :size="16" />{{ actionLabel }}</button></div></div>
+
+  <section class="panel setup-panel">
+    <div class="setup-tabs"><button v-for="t in ['ยี่ห้อสินค้า','หมวดหมู่','คู่มือการใช้งาน']" :key="t" :class="{ active: activeTab === t }" @click="activeTab = t"><AppIcon :name="t === 'ยี่ห้อสินค้า' ? 'carWheel' : t === 'หมวดหมู่' ? 'grid' : 'document'" :size="15" />{{ t }}<span class="setup-count">{{ t === 'ยี่ห้อสินค้า' ? brands.length : t === 'หมวดหมู่' ? categories.length : manuals.length }}</span></button></div>
+    <div v-if="activeTab === 'ยี่ห้อสินค้า'" class="setup-content"><div class="setup-intro"><div><h2>ยี่ห้อสินค้า</h2><p>กำหนดแบรนด์ที่ใช้จัดกลุ่มสินค้าและรายงานยอดขาย</p></div><label class="search-field"><AppIcon name="search" :size="15" /><input placeholder="ค้นหายี่ห้อ..." /></label></div><div class="table-wrap"><table class="data-table"><thead><tr><th>ยี่ห้อ</th><th>ประเภท</th><th>จำนวนสินค้า</th><th>สถานะ</th><th>ปรับปรุงล่าสุด</th><th></th></tr></thead><tbody><tr v-for="b in brands" :key="b.name"><td><div class="brand-cell"><span>{{ b.code }}</span><strong>{{ b.name }}</strong></div></td><td>{{ b.type }}</td><td>{{ b.products }} รายการ</td><td><span class="badge badge-green">{{ b.state }}</span></td><td>6 ต.ค. 2569</td><td><button class="tiny-action" @click="notify(`แก้ไขแบรนด์ ${b.name} ในระบบจริง`)"><AppIcon name="more" /></button></td></tr></tbody></table></div></div>
+    <div v-else-if="activeTab === 'หมวดหมู่'" class="setup-content"><div class="setup-intro"><div><h2>หมวดหมู่สินค้าและบริการ</h2><p>ใช้จัดโครงสร้างแค็ตตาล็อกและตัวกรองสินค้า</p></div><label class="search-field"><AppIcon name="search" :size="15" /><input placeholder="ค้นหาหมวดหมู่..." /></label></div><div class="category-grid"><article v-for="c in categories" :key="c.name" class="category-card"><span class="category-visual" :class="c.color"><AppIcon :name="c.parent === 'บริการ' ? 'carWheel' : 'box'" :size="18" /></span><div class="category-copy"><strong>{{ c.name }}</strong><small>หมวดหลัก: {{ c.parent }} · {{ c.products }} รายการ</small></div><span class="badge badge-green">{{ c.state }}</span><button class="tiny-action" @click="notify(`แก้ไขหมวดหมู่ ${c.name} ในระบบจริง`)"><AppIcon name="more" /></button></article></div></div>
+    <div v-else class="setup-content manuals-content"><div class="setup-intro"><div><h2>คู่มือการใช้งาน</h2><p>เอกสารช่วยเหลือสำหรับผู้ดูแลและพนักงาน</p></div><label class="search-field"><AppIcon name="search" :size="15" /><input placeholder="ค้นหาคู่มือ..." /></label></div><div class="manual-grid"><article v-for="m in manuals" :key="m.title" class="manual-card"><span class="manual-icon"><AppIcon name="document" :size="18" /></span><span class="manual-category">{{ m.category }}</span><h3>{{ m.title }}</h3><p>{{ m.desc }}</p><div><small>อัปเดต {{ m.updated }} · {{ m.read }}</small><button @click="notify(`เปิดคู่มือ: ${m.title}`)">เปิดคู่มือ <AppIcon name="arrowRight" :size="13" /></button></div></article></div></div>
+  </section>
+  <div class="setup-note"><AppIcon name="shield" :size="14" /><span>รายการบนหน้าจอนี้เป็นข้อมูลตัวอย่างสำหรับต้นแบบ ระบบจริงจะใช้ Master Data กลางบน MySQL</span></div>
+
+  <div v-if="showModal" class="modal-backdrop" @click.self="showModal = false"><div class="modal-card"><div class="modal-head"><div><h3>{{ actionLabel }}</h3><p>สร้างรายการข้อมูลตั้งต้นใหม่</p></div><button class="modal-close" @click="showModal = false"><AppIcon name="close" :size="16" /></button></div><div class="modal-content"><div class="field"><label class="form-label">ชื่อรายการ <span class="required">*</span></label><input v-model="itemName" class="form-control" placeholder="ระบุชื่อ" /></div><div v-if="activeTab !== 'คู่มือการใช้งาน'" class="field"><label class="form-label">{{ activeTab === 'ยี่ห้อสินค้า' ? 'ประเภท' : 'หมวดหลัก' }}</label><select v-model="itemNote" class="form-control"><option value="">เลือกค่า</option><option>สินค้า</option><option>บริการ</option><option>ยางรถยนต์</option><option>อะไหล่</option></select></div><div v-else class="field"><label class="form-label">คำอธิบาย</label><input v-model="itemNote" class="form-control" placeholder="คำอธิบายสั้น ๆ" /></div></div><div class="modal-footer"><button class="btn btn-light" @click="showModal = false">ยกเลิก</button><button class="btn btn-primary" @click="addItem">บันทึก</button></div></div></div>
+</template>
+
+<style scoped>
+.setup-panel{overflow:hidden}.setup-tabs{display:flex;align-items:center;gap:4px;padding:11px 16px;border-bottom:1px solid #eef0f2}.setup-tabs button{height:34px;border:0;border-radius:8px;background:transparent;color:#858a91;padding:0 11px;display:flex;align-items:center;gap:7px;font-size:9px;font-weight:750}.setup-tabs button.active{background:#fff0f1;color:var(--red)}.setup-count{font-size:8px;color:#a3a7ad;background:#f0f1f3;border-radius:20px;padding:3px 6px}.setup-tabs button.active .setup-count{background:#ffdcdf;color:#c5222b}.setup-content{min-height:360px}.setup-intro{padding:16px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px}.setup-intro h2{font-size:13px;margin:0}.setup-intro p{font-size:8px;color:#979ca3;margin:4px 0 0}.setup-intro .search-field{height:32px;width:200px}.setup-intro .search-field input{font-size:9px}.brand-cell{display:flex;align-items:center;gap:8px}.brand-cell span{width:27px;height:27px;border-radius:8px;background:#f3f4f5;color:#686d74;display:grid;place-items:center;font-size:8px;font-weight:850}.brand-cell strong{font-size:9px;color:#35393e}.category-grid{padding:0 17px 17px;display:grid;grid-template-columns:1fr 1fr;gap:9px}.category-card{display:flex;align-items:center;gap:9px;border:1px solid #edf0f2;border-radius:10px;padding:10px}.category-visual{width:33px;height:33px;border-radius:9px;display:grid;place-items:center;flex:none}.category-visual.red{color:var(--red);background:#fff0f1}.category-visual.amber{color:#b87917;background:#fff5df}.category-visual.blue{color:#3374c8;background:#edf4ff}.category-visual.green{color:#15966d;background:#e8f7f0}.category-copy{min-width:0;display:flex;flex-direction:column;gap:4px;flex:1}.category-copy strong{font-size:9px}.category-copy small{font-size:7px;color:#979ca3}.category-card .badge{font-size:7px;padding:3px 6px}.category-card .badge:before{width:4px;height:4px}.manual-grid{padding:0 17px 17px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.manual-card{border:1px solid #edf0f2;border-radius:11px;padding:12px;position:relative}.manual-icon{width:31px;height:31px;border-radius:9px;background:#fff0f1;color:var(--red);display:grid;place-items:center}.manual-category{position:absolute;right:11px;top:14px;background:#f3f4f5;color:#797e85;border-radius:5px;padding:4px 6px;font-size:7px}.manual-card h3{font-size:10px;margin:11px 0 5px}.manual-card p{font-size:8px;color:#8f949b;line-height:1.6;margin:0 0 12px;min-height:25px}.manual-card>div{padding-top:8px;border-top:1px solid #f0f1f2;display:flex;align-items:center;justify-content:space-between;gap:5px}.manual-card small{font-size:7px;color:#9a9fa6}.manual-card button{border:0;background:transparent;color:var(--red);font-size:8px;font-weight:750;display:flex;align-items:center;gap:4px;white-space:nowrap}.setup-note{margin-top:12px;display:flex;align-items:center;gap:7px;color:#92979e;font-size:8px}.setup-note svg{flex:none;color:#a0a5ac}.required{color:var(--red)}
+@media(max-width:650px){.setup-tabs{overflow:auto}.setup-tabs button{white-space:nowrap}.setup-intro{align-items:flex-start;flex-direction:column}.setup-intro .search-field{width:100%}.category-grid,.manual-grid{grid-template-columns:1fr;padding-left:10px;padding-right:10px}.brand-cell strong{font-size:8px}.setup-note{align-items:flex-start;line-height:1.5}}
+</style>
